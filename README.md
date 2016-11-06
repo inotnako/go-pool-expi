@@ -65,7 +65,7 @@ func (p *Pool) Go(f func() int) {
 
 ```
 
-## Pool one channel/ditributer of tasks
+## Pool one channel/distributor of tasks
 
 * Up pool size=1000 - `6.274303933s`
 * Processed 1000 tasks - `3.841723ms`
@@ -110,5 +110,35 @@ func MakePool(s int) *Pool {
 
 func (p *Pool) Go(f func() int) {
 	p.run <- f
+}
+```
+
+## Disposable pool
+
+
+* Mix metrics up/processed/down 1000x1000 size/tasks - `337.827µs`
+
+Code
+```
+wg := &sync.WaitGroup{}
+wg.Add(1000)
+for i := 0; i < 1000; i++ {
+	go func() int {
+		defer wg.Done()
+		return i
+	}()
+}
+wg.Wait()
+```
+
+## Without pool %)))
+
+* tasks=1000 - `3.695µs`
+
+```
+for i := 0; i < 1000; i++ {
+	func() int {
+		return i
+	}()
 }
 ```
